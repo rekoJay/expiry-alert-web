@@ -1,23 +1,20 @@
+// sendNotifications.ts
+
 import dotenv from 'dotenv';
 import nodeFetch from 'node-fetch';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, getDocs, collection } from 'firebase/firestore';
+import admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import serviceAccount from './serviceAccountKey.json'; // 🔥 서비스 계정 경로 정확히 입력
 
 dotenv.config();
 
 const fetch = (nodeFetch as any) as typeof nodeFetch;
 
-    const firebaseConfig = {
-    apiKey: process.env.VITE_FIREBASE_API_KEY!,
-    authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN!,
-    projectId: process.env.VITE_FIREBASE_PROJECT_ID!,
-    storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET!,
-    messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID!,
-    appId: process.env.VITE_FIREBASE_APP_ID!,
-    };
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as any),
+});
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getFirestore();
 
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL!;
 const TARGET_DAYS = [30, 14, 7, 3, 1];
@@ -45,7 +42,8 @@ async function sendDiscordMessage(content: string) {
 }
 
 async function notifyExpiringProducts() {
-  const snapshot = await getDocs(collection(db, 'products'));
+  const snapshot = await db.collection('products').get();
+
   for (const doc of snapshot.docs) {
     const data = doc.data();
     const dday = getDdayLabel(data.date);

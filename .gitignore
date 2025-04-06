@@ -1,3 +1,5 @@
+.env
+.env.*
 # Logs
 logs
 *.log
@@ -22,3 +24,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase Functions - 빌드 결과물 무시
+functions/lib/
+functions/node_modules/
+
+# 시스템 빌드 오류로 생길 수 있는 JS 파일들
+functions/*.js
+functions/*.js.map
